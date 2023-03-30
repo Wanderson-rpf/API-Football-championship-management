@@ -1,15 +1,15 @@
 import * as express from 'express';
+import errorMiddleware from './middleware/error-middleware';
+import teamsRouter from './routes/teamsRouter';
 
 class App {
   public app: express.Express;
 
   constructor() {
     this.app = express();
-
     this.config();
-
-    // Não remover essa rota
     this.app.get('/', (req, res) => res.json({ ok: true }));
+    this.routes();
   }
 
   private config():void {
@@ -19,9 +19,13 @@ class App {
       res.header('Access-Control-Allow-Headers', '*');
       next();
     };
-
     this.app.use(express.json());
     this.app.use(accessControl);
+  }
+
+  private routes(): void {
+    this.app.use(teamsRouter);
+    this.app.use(errorMiddleware);
   }
 
   public start(PORT: string | number):void {
