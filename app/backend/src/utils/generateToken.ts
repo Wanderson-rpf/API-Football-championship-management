@@ -11,7 +11,6 @@ export default class Token {
 
   public generateToken(payload: Omit<IUser, 'password'>): string {
     try {
-      console.log('Generate token payload:', payload);
       const token = jwt.sign(payload, this.secret, this.jwtConfig);
       return token;
     } catch (err) {
