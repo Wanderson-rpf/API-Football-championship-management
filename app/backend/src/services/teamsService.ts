@@ -3,15 +3,15 @@ import Teams from '../database/models/Teams';
 import ITeamsService, { ITeamId } from './interface/ITeamsService';
 
 export default class TeamsService implements ITeamsService {
-  private teamsModel: ModelStatic<Teams> = Teams;
+  private _teamsModel: ModelStatic<Teams> = Teams;
 
   public async getAllTeams(): Promise<ITeamId[]> {
-    const allTeams = await this.teamsModel.findAll();
+    const allTeams = await this._teamsModel.findAll();
     return allTeams;
   }
 
   public async getByIdTeam(id: number): Promise<ITeamId> {
-    const [team] = await this.teamsModel.findAll({
+    const [team] = await this._teamsModel.findAll({
       where: { id },
     });
     return team;
