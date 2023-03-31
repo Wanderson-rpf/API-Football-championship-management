@@ -3,6 +3,7 @@ import verifyRequiredFields from '../middleware/verifyRequiredFields';
 import LoginService from '../services/loginService';
 import LoginController from '../controller/loginController';
 import LoginValidations from '../validations/login/loginValidations';
+import validateToken from '../middleware/validateToken';
 
 const router = Router();
 
@@ -14,6 +15,12 @@ router.post(
   '/',
   verifyRequiredFields('login'),
   loginController.login.bind(loginController),
+);
+
+router.get(
+  '/role',
+  validateToken,
+  loginController.role.bind(loginController),
 );
 
 export default router;

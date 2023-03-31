@@ -8,6 +8,7 @@ import InvalidParamError from '../errors/invalidParamError';
 export default class LoginService implements IUserService {
   private _userModel: ModelStatic<Users> = Users;
   private _loginValidations: ILoginValidations;
+  private _msgInvalidError = 'Invalid email or password';
 
   constructor(loginValidations: ILoginValidations) {
     this._loginValidations = loginValidations;
@@ -22,10 +23,25 @@ export default class LoginService implements IUserService {
     });
 
     if (!user) {
-      throw new InvalidParamError('Invalid email or password');
+      throw new InvalidParamError(this._msgInvalidError);
     }
     if (!bcrypt.compareSync(password, user.password)) {
-      throw new InvalidParamError('Invalid email or password');
+      throw new InvalidParamError(this._msgInvalidError);
+    }
+
+    return user.dataValues;
+  }
+
+  public async verifyAuthentication(email: string, password: string): Promise<IUserID> {
+    const [user] = await this._userModel.findAll({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new InvalidParamError(this._msgInvalidError);
+    }
+    if (password !== user.password) {
+      throw new InvalidParamError(this._msgInvalidError);
     }
 
     return user.dataValues;

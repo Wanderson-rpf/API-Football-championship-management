@@ -14,9 +14,20 @@ export default class LoginController implements ILoginController {
     try {
       const { email, password } = req.body;
       const user = await this._loginService.getUser(email, password);
-      const token = new Token().generateToken(user);
+      const token = new Token().generate(user);
 
       return res.status(200).json({ token });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async role(_req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+      const { email, password } = res.locals.dataUser;
+      const { role } = await this._loginService.verifyAuthentication(email, password);
+
+      return res.status(200).json({ role });
     } catch (error) {
       next(error);
     }
