@@ -11,7 +11,7 @@ const loginService = new LoginService(loginValidations);
 const loginController = new LoginController(loginService);
 
 router.post(
-  '/login',
+  '/',
   verifyRequiredFields('login'),
   loginController.login.bind(loginController),
 );

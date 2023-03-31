@@ -25,8 +25,8 @@ class App {
   }
 
   private routes(): void {
-    this.app.use(teamsRouter);
-    this.app.use(loginRouter);
+    this.app.use('/teams', teamsRouter);
+    this.app.use('/login', loginRouter);
     this.app.use(errorMiddleware);
   }
 
