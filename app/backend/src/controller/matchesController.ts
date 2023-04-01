@@ -42,4 +42,19 @@ export default class MatchesController implements IMatchesController {
       next(error);
     }
   }
+
+  public async updateScoreBoardMatches(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void | Response> {
+    try {
+      const { id } = req.params;
+      const newScore = req.body;
+      await this._matchesService.updateScoreBoardMatches(newScore, Number(id));
+      return res.status(200).json({ message: 'Score updated' });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

@@ -16,6 +16,11 @@ router.get(
     '/:id/finish',
     validateToken,
     matchesController.updateStatusMatches.bind(matchesController),
+  )
+  .patch(
+    '/:id',
+    validateToken,
+    matchesController.updateScoreBoardMatches.bind(matchesController),
   );
 
 export default router;
