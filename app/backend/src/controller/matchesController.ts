@@ -18,13 +18,26 @@ export default class MatchesController implements IMatchesController {
       const { inProgress } = req.query;
 
       if (inProgress) {
-        const matches = await this._matchesService
-          .getMatchesInProgress(inProgress as string);
+        const matches = await this._matchesService.getMatchesInProgress(inProgress as string);
         return res.status(200).json(matches);
       }
 
       const allMatches = await this._matchesService.getAllMatches();
       return res.status(200).json(allMatches);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async updateStatusMatches(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void | Response> {
+    try {
+      const { id } = req.params;
+      await this._matchesService.updateStatusMatches('false', Number(id));
+      return res.status(200).json({ message: 'Finished' });
     } catch (error) {
       next(error);
     }

@@ -1,12 +1,21 @@
 import { Router } from 'express';
 import MatchesService from '../services/matchesService';
 import MatchesController from '../controller/matchesController';
+import validateToken from '../middleware/validateToken';
 
 const router = Router();
 
 const matcherService = new MatchesService();
 const matchesController = new MatchesController(matcherService);
 
-router.get('/', matchesController.getAllMatches.bind(matchesController));
+router.get(
+  '/',
+  matchesController.getAllMatches.bind(matchesController),
+)
+  .patch(
+    '/:id/finish',
+    validateToken,
+    matchesController.updateStatusMatches.bind(matchesController),
+  );
 
 export default router;

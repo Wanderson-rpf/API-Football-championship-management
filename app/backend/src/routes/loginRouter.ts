@@ -15,12 +15,11 @@ router.post(
   '/',
   verifyRequiredFields('login'),
   loginController.login.bind(loginController),
-);
-
-router.get(
-  '/role',
-  validateToken,
-  loginController.role.bind(loginController),
-);
+)
+  .get(
+    '/role',
+    validateToken,
+    loginController.role.bind(loginController),
+  );
 
 export default router;

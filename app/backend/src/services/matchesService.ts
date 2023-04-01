@@ -44,4 +44,8 @@ export default class MatchesService implements IMatchesService {
     });
     return matchesInProgress;
   }
+
+  public async updateStatusMatches(newStatus: string, id: number): Promise<void> {
+    await this._matchesModel.update({ inProgress: newStatus }, { where: { id } });
+  }
 }
