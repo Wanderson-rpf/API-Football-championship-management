@@ -5,9 +5,18 @@ export interface IScore {
   awayTeamGoals: number;
 }
 
+export interface IMatch {
+  homeTeamId: number,
+  awayTeamId: number,
+  homeTeamGoals: number,
+  awayTeamGoals: number,
+}
+
 export default interface IMatchesService {
   getAllMatches(): Promise<Matches[]>
+  getByIdMatches(id: number): Promise<Matches>
   getMatchesInProgress(statusProgress: string): Promise<Matches[]>
   updateStatusMatches(newStatus: string, id: number): Promise<void>
   updateScoreBoardMatches(newScore: IScore, id: number): Promise<void>
+  addNewMatch(newMatcher: IMatch): Promise<Matches>
 }

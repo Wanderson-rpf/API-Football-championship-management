@@ -57,4 +57,18 @@ export default class MatchesController implements IMatchesController {
       next(error);
     }
   }
+
+  public async addNewMatch(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<Response | void> {
+    try {
+      const newMatch = req.body;
+      const matchInserted = await this._matchesService.addNewMatch(newMatch);
+      res.status(201).json(matchInserted);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

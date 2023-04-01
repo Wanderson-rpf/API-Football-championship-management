@@ -2,10 +2,12 @@ import { Router } from 'express';
 import MatchesService from '../services/matchesService';
 import MatchesController from '../controller/matchesController';
 import validateToken from '../middleware/validateToken';
+import TeamValidations from '../validations/team/teamValidations';
 
 const router = Router();
 
-const matcherService = new MatchesService();
+const teamValidations = new TeamValidations();
+const matcherService = new MatchesService(teamValidations);
 const matchesController = new MatchesController(matcherService);
 
 router.get(
@@ -21,6 +23,11 @@ router.get(
     '/:id',
     validateToken,
     matchesController.updateScoreBoardMatches.bind(matchesController),
+  )
+  .post(
+    '/',
+    validateToken,
+    matchesController.addNewMatch.bind(matchesController),
   );
 
 export default router;
