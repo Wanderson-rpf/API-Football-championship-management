@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import Matches from '../database/models/Matches';
 import IMatchesService from '../services/interface/IMatchesService';
 import IMatchesController from './interface/IMatchesController';
 
@@ -16,11 +15,11 @@ export default class MatchesController implements IMatchesController {
     next: NextFunction,
   ): Promise<Response | void> {
     try {
-      const { query } = req;
+      const { inProgress } = req.query;
 
-      if (query.inProgress) {
+      if (req.query) {
         const matches = await this._matchesService
-          .getMatchesInProgress(query);
+          .getMatchesInProgress(inProgress as string);
         return res.status(200).json(matches);
       }
 
@@ -29,13 +28,5 @@ export default class MatchesController implements IMatchesController {
     } catch (error) {
       next(error);
     }
-  }
-
-  static async getMatchesInProgress(
-    allMatches: Matches[],
-    statusProgress: boolean,
-  ): Promise<Matches[]> {
-    const filteredMatches = allMatches.filter(({ inProgress }) => inProgress === statusProgress);
-    return filteredMatches;
   }
 }
