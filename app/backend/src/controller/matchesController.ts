@@ -17,7 +17,7 @@ export default class MatchesController implements IMatchesController {
     try {
       const { inProgress } = req.query;
 
-      if (req.query) {
+      if (inProgress) {
         const matches = await this._matchesService
           .getMatchesInProgress(inProgress as string);
         return res.status(200).json(matches);
