@@ -11,7 +11,9 @@ export default class LeaderBoardController implements ILeaderBoardController {
 
   public async report(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const report = await this._leaderBoardService.report();
+      const { path } = req;
+      const report = await this._leaderBoardService
+        .report(path === '/home' ? 'homeTeamId' : 'awayTeamId');
 
       return res.status(200).json(report);
     } catch (error) {

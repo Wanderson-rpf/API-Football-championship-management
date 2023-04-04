@@ -13,23 +13,26 @@ export default class LeaderBoardService implements ILeaderBoardService {
     return teams;
   }
 
-  public async getAllMatchesOfTeam(idTeam: number): Promise<number> {
+  public async getAllMatchesOfTeam(
+    idTeam: number,
+    team: 'homeTeamId' | 'awayTeamId',
+  ): Promise<number> {
     const allMatchesOfTeam = await this._matchesModel.count({
       where: {
         inProgress: 0,
-        homeTeamId: idTeam,
+        [team]: idTeam,
       },
     });
 
     return allMatchesOfTeam;
   }
 
-  public async getWinsTeam(idTeam: number): Promise<number> {
+  public async getWinsTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
     const wins = await this._matchesModel.count({
       where: {
         inProgress: 0,
         homeTeamGoals: { [Op.gt]: sequelize.col('away_team_goals') },
-        homeTeamId: idTeam,
+        [team]: idTeam,
       },
       distinct: true,
       col: 'id',
@@ -38,12 +41,12 @@ export default class LeaderBoardService implements ILeaderBoardService {
     return wins;
   }
 
-  public async getDrawsTeam(idTeam: number): Promise<number> {
+  public async getDrawsTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
     const draws = await this._matchesModel.count({
       where: {
         inProgress: 0,
         homeTeamGoals: { [Op.eq]: sequelize.col('away_team_goals') },
-        homeTeamId: idTeam,
+        [team]: idTeam,
       },
       distinct: true,
       col: 'id',
@@ -52,12 +55,12 @@ export default class LeaderBoardService implements ILeaderBoardService {
     return draws;
   }
 
-  public async getLossesTeam(idTeam: number): Promise<number> {
+  public async getLossesTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
     const draws = await this._matchesModel.count({
       where: {
         inProgress: 0,
         homeTeamGoals: { [Op.lt]: sequelize.col('away_team_goals') },
-        homeTeamId: idTeam,
+        [team]: idTeam,
       },
       distinct: true,
       col: 'id',
@@ -66,18 +69,18 @@ export default class LeaderBoardService implements ILeaderBoardService {
     return draws;
   }
 
-  public async getGoalsTeam(idTeam: number): Promise<IAllGoals> {
+  public async getGoalsTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<IAllGoals> {
     const goalsFavorInHome = await this._matchesModel.sum('home_team_goals', {
       where: {
         inProgress: 0,
-        homeTeamId: idTeam,
+        [team]: idTeam,
       },
     });
 
     const goalsOwnInHome = await this._matchesModel.sum('away_team_goals', {
       where: {
         inProgress: 0,
-        homeTeamId: idTeam,
+        [team]: idTeam,
       },
     });
 
@@ -89,28 +92,28 @@ export default class LeaderBoardService implements ILeaderBoardService {
     return allGoals;
   }
 
-  public async getScoreTeam(idTeam: number): Promise<number> {
-    const matches = await this.getAllMatchesOfTeam(idTeam);
-    const wins = await this.getWinsTeam(idTeam);
-    const draw = await this.getDrawsTeam(idTeam);
-    const loss = await this.getLossesTeam(idTeam);
+  public async getScoreTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
+    const matches = await this.getAllMatchesOfTeam(idTeam, team);
+    const wins = await this.getWinsTeam(idTeam, team);
+    const draw = await this.getDrawsTeam(idTeam, team);
+    const loss = await this.getLossesTeam(idTeam, team);
 
     const score = ((matches - draw - loss) * 3) + (matches - wins - loss);
 
     return score;
   }
 
-  public async goalsBalance(idTeam: number): Promise<number> {
-    const { goalsFavor } = await this.getGoalsTeam(idTeam);
-    const { goalsOwn } = await this.getGoalsTeam(idTeam);
+  public async goalsBalance(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
+    const { goalsFavor } = await this.getGoalsTeam(idTeam, team);
+    const { goalsOwn } = await this.getGoalsTeam(idTeam, team);
     const goalsBalance = goalsFavor - goalsOwn;
 
     return goalsBalance;
   }
 
-  public async efficiencyTeam(idTeam: number): Promise<string> {
-    const score = await this.getScoreTeam(idTeam);
-    const matches = await this.getAllMatchesOfTeam(idTeam);
+  public async efficiencyTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<string> {
+    const score = await this.getScoreTeam(idTeam, team);
+    const matches = await this.getAllMatchesOfTeam(idTeam, team);
     const efficiency = (score / (matches * 3)) * 100;
 
     return efficiency.toFixed(2);
@@ -128,20 +131,20 @@ export default class LeaderBoardService implements ILeaderBoardService {
     });
   }
 
-  public async report(): Promise<IReport[]> {
+  public async report(teamHomeOrAway: 'homeTeamId' | 'awayTeamId'): Promise<IReport[]> {
     const allTeams = await this.getAllTeam();
 
     const report = await Promise.all(allTeams.map(async (team) => ({
       name: team.teamName,
-      totalPoints: await this.getScoreTeam(team.id),
-      totalGames: await this.getAllMatchesOfTeam(team.id),
-      totalVictories: await this.getWinsTeam(team.id),
-      totalDraws: await this.getDrawsTeam(team.id),
-      totalLosses: await this.getLossesTeam(team.id),
-      goalsFavor: (await this.getGoalsTeam(team.id)).goalsFavor,
-      goalsOwn: (await this.getGoalsTeam(team.id)).goalsOwn,
-      goalsBalance: await this.goalsBalance(team.id),
-      efficiency: await this.efficiencyTeam(team.id),
+      totalPoints: await this.getScoreTeam(team.id, teamHomeOrAway),
+      totalGames: await this.getAllMatchesOfTeam(team.id, teamHomeOrAway),
+      totalVictories: await this.getWinsTeam(team.id, teamHomeOrAway),
+      totalDraws: await this.getDrawsTeam(team.id, teamHomeOrAway),
+      totalLosses: await this.getLossesTeam(team.id, teamHomeOrAway),
+      goalsFavor: (await this.getGoalsTeam(team.id, teamHomeOrAway)).goalsFavor,
+      goalsOwn: (await this.getGoalsTeam(team.id, teamHomeOrAway)).goalsOwn,
+      goalsBalance: await this.goalsBalance(team.id, teamHomeOrAway),
+      efficiency: await this.efficiencyTeam(team.id, teamHomeOrAway),
     })));
 
     const reportSorted = LeaderBoardService.sortReport(report);
