@@ -28,10 +28,12 @@ export default class LeaderBoardService implements ILeaderBoardService {
   }
 
   public async getWinsTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
+    const baseGoals = team === 'homeTeamId' ? 'homeTeamGoals' : 'awayTeamGoals';
+    const compareGoals = team === 'homeTeamId' ? 'away_team_goals' : 'home_team_goals';
     const wins = await this._matchesModel.count({
       where: {
         inProgress: 0,
-        homeTeamGoals: { [Op.gt]: sequelize.col('away_team_goals') },
+        [baseGoals]: { [Op.gt]: sequelize.col(compareGoals) },
         [team]: idTeam,
       },
       distinct: true,
@@ -42,10 +44,12 @@ export default class LeaderBoardService implements ILeaderBoardService {
   }
 
   public async getDrawsTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
+    const baseGoals = team === 'homeTeamId' ? 'homeTeamGoals' : 'awayTeamGoals';
+    const compareGoals = team === 'homeTeamId' ? 'away_team_goals' : 'home_team_goals';
     const draws = await this._matchesModel.count({
       where: {
         inProgress: 0,
-        homeTeamGoals: { [Op.eq]: sequelize.col('away_team_goals') },
+        [baseGoals]: { [Op.eq]: sequelize.col(compareGoals) },
         [team]: idTeam,
       },
       distinct: true,
@@ -56,10 +60,12 @@ export default class LeaderBoardService implements ILeaderBoardService {
   }
 
   public async getLossesTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
+    const baseGoals = team === 'homeTeamId' ? 'homeTeamGoals' : 'awayTeamGoals';
+    const compareGoals = team === 'homeTeamId' ? 'away_team_goals' : 'home_team_goals';
     const draws = await this._matchesModel.count({
       where: {
         inProgress: 0,
-        homeTeamGoals: { [Op.lt]: sequelize.col('away_team_goals') },
+        [baseGoals]: { [Op.lt]: sequelize.col(compareGoals) },
         [team]: idTeam,
       },
       distinct: true,
@@ -70,24 +76,21 @@ export default class LeaderBoardService implements ILeaderBoardService {
   }
 
   public async getGoalsTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<IAllGoals> {
-    const goalsFavorInHome = await this._matchesModel.sum('home_team_goals', {
+    const goalsF = team === 'homeTeamId' ? 'home_team_goals' : 'away_team_goals';
+    const goalsO = team === 'homeTeamId' ? 'away_team_goals' : 'home_team_goals';
+    const goalsFavor = await this._matchesModel.sum(goalsF, {
       where: {
         inProgress: 0,
         [team]: idTeam,
       },
     });
-
-    const goalsOwnInHome = await this._matchesModel.sum('away_team_goals', {
+    const goalsOwn = await this._matchesModel.sum(goalsO, {
       where: {
         inProgress: 0,
         [team]: idTeam,
       },
     });
-
-    const allGoals = {
-      goalsFavor: goalsFavorInHome,
-      goalsOwn: goalsOwnInHome,
-    };
+    const allGoals = { goalsFavor, goalsOwn };
 
     return allGoals;
   }
