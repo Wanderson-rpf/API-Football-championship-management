@@ -153,4 +153,35 @@ export default class LeaderBoardService implements ILeaderBoardService {
     const reportSorted = LeaderBoardService.sortReport(report);
     return reportSorted;
   }
+
+  static calcEfficiency(score: number, matches: number) {
+    const efficiency = (score / (matches * 3)) * 100;
+    return efficiency.toFixed(2);
+  }
+
+  // eslint-disable-next-line max-lines-per-function
+  public async generalReport(): Promise<IReport[]> {
+    const dataInHome = await this.report('homeTeamId');
+    const dataInAway = await this.report('awayTeamId');
+
+    const resumeDataTeams = dataInHome.map((teamHome) => {
+      const dataAway = dataInAway.find((teamAway) => teamHome.name === teamAway.name) as IReport;
+      return {
+        name: teamHome.name,
+        totalPoints: teamHome.totalPoints + dataAway.totalPoints,
+        totalGames: teamHome.totalGames + dataAway.totalGames,
+        totalVictories: teamHome.totalVictories + dataAway.totalVictories,
+        totalDraws: teamHome.totalDraws + dataAway.totalDraws,
+        totalLosses: teamHome.totalLosses + dataAway.totalLosses,
+        goalsFavor: teamHome.goalsFavor + dataAway.goalsFavor,
+        goalsOwn: teamHome.goalsOwn + dataAway.goalsOwn,
+        goalsBalance: teamHome.goalsBalance + dataAway.goalsBalance,
+        efficiency: LeaderBoardService.calcEfficiency(
+          teamHome.totalPoints + dataAway.totalPoints,
+          teamHome.totalGames + dataAway.totalGames,
+        ),
+      };
+    });
+    return LeaderBoardService.sortReport(resumeDataTeams);
+  }
 }

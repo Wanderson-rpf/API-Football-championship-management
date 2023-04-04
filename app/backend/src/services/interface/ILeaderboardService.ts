@@ -29,4 +29,5 @@ export default interface ILeaderBoardService {
   goalsBalance(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number>;
   efficiencyTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<string>
   report(teamHomeOrAway: string): Promise<IReport[]>;
+  generalReport(): Promise<IReport[]>;
 }

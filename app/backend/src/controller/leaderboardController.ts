@@ -20,4 +20,18 @@ export default class LeaderBoardController implements ILeaderBoardController {
       next(error);
     }
   }
+
+  public async generalReport(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<Response | void> {
+    try {
+      const report = await this._leaderBoardService.generalReport();
+
+      return res.status(200).json(report);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

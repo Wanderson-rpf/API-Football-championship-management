@@ -14,6 +14,10 @@ router.get(
   .get(
     '/away',
     leaderBoardController.report.bind(leaderBoardController),
+  )
+  .get(
+    '/',
+    leaderBoardController.generalReport.bind(leaderBoardController),
   );
 
 export default router;
