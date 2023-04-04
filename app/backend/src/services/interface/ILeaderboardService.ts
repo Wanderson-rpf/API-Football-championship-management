@@ -5,6 +5,14 @@ export interface IAllGoals {
   goalsOwn: number;
 }
 
+export interface IStatistic {
+  totalPoints: number,
+  totalGames: number,
+  goalsFavor: number,
+  goalsOwn: number,
+  efficiency: string;
+}
+
 export interface IReport {
   name: string,
   totalPoints: number,

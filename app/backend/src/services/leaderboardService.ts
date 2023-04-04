@@ -2,7 +2,11 @@ import { Op, ModelStatic } from 'sequelize';
 import sequelize = require('sequelize');
 import Matches from '../database/models/Matches';
 import Teams from '../database/models/Teams';
-import ILeaderBoardService, { IAllGoals, IReport } from './interface/ILeaderboardService';
+import ILeaderBoardService, {
+  IAllGoals,
+  IReport,
+  IStatistic,
+} from './interface/ILeaderboardService';
 
 export default class LeaderBoardService implements ILeaderBoardService {
   private _teamsModel: ModelStatic<Teams> = Teams;
@@ -100,7 +104,6 @@ export default class LeaderBoardService implements ILeaderBoardService {
     const wins = await this.getWinsTeam(idTeam, team);
     const draw = await this.getDrawsTeam(idTeam, team);
     const loss = await this.getLossesTeam(idTeam, team);
-
     const score = ((matches - draw - loss) * 3) + (matches - wins - loss);
 
     return score;
@@ -159,12 +162,39 @@ export default class LeaderBoardService implements ILeaderBoardService {
     return efficiency.toFixed(2);
   }
 
-  // eslint-disable-next-line max-lines-per-function
-  public async generalReport(): Promise<IReport[]> {
+  static calcGoalsBalance(GP: number, GC: number) {
+    const balance = GP - GC;
+    return balance.toFixed(2);
+  }
+
+  // Function created due to a lint error in the generalReport() method.
+  private async calcEfficientAndGoalsBalance() {
     const dataInHome = await this.report('homeTeamId');
     const dataInAway = await this.report('awayTeamId');
 
-    const resumeDataTeams = dataInHome.map((teamHome) => {
+    const resumeStatisticTeams = dataInHome.map((teamHome) => {
+      const dataAway = dataInAway.find((teamAway) => teamHome.name === teamAway.name) as IStatistic;
+      return {
+        goalsBalance: LeaderBoardService.calcGoalsBalance(
+          teamHome.goalsFavor + dataAway.goalsFavor,
+          teamHome.goalsOwn + dataAway.goalsOwn,
+        ),
+        efficiency: LeaderBoardService.calcEfficiency(
+          teamHome.totalPoints + dataAway.totalPoints,
+          teamHome.totalGames + dataAway.totalGames,
+        ),
+      };
+    });
+
+    return resumeStatisticTeams;
+  }
+
+  public async generalReport(): Promise<IReport[]> {
+    const dataInHome = await this.report('homeTeamId');
+    const dataInAway = await this.report('awayTeamId');
+    const statistic = await this.calcEfficientAndGoalsBalance();
+
+    return LeaderBoardService.sortReport(dataInHome.map((teamHome, index) => {
       const dataAway = dataInAway.find((teamAway) => teamHome.name === teamAway.name) as IReport;
       return {
         name: teamHome.name,
@@ -175,13 +205,9 @@ export default class LeaderBoardService implements ILeaderBoardService {
         totalLosses: teamHome.totalLosses + dataAway.totalLosses,
         goalsFavor: teamHome.goalsFavor + dataAway.goalsFavor,
         goalsOwn: teamHome.goalsOwn + dataAway.goalsOwn,
-        goalsBalance: teamHome.goalsBalance + dataAway.goalsBalance,
-        efficiency: LeaderBoardService.calcEfficiency(
-          teamHome.totalPoints + dataAway.totalPoints,
-          teamHome.totalGames + dataAway.totalGames,
-        ),
+        goalsBalance: Number(statistic[index].goalsBalance),
+        efficiency: statistic[index].efficiency,
       };
-    });
-    return LeaderBoardService.sortReport(resumeDataTeams);
+    }));
   }
 }
