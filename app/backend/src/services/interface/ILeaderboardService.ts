@@ -14,6 +14,8 @@ export interface IReport {
   totalLosses: number,
   goalsFavor: number,
   goalsOwn: number,
+  goalsBalance: number,
+  efficiency: string,
 }
 
 export default interface ILeaderBoardService {
@@ -23,5 +25,7 @@ export default interface ILeaderBoardService {
   getWinsTeam(idTeam: number): Promise<number>;
   getDrawsTeam(idTeam: number): Promise<number>;
   getGoalsTeam(idTeam: number): Promise<IAllGoals>;
+  goalsBalance(idTeam: number): Promise<number>;
+  efficiencyTeam(idTeam: number): Promise<string>
   report(): Promise<IReport[]>;
 }

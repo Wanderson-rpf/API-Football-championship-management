@@ -100,6 +100,34 @@ export default class LeaderBoardService implements ILeaderBoardService {
     return score;
   }
 
+  public async goalsBalance(idTeam: number): Promise<number> {
+    const { goalsFavor } = await this.getGoalsTeam(idTeam);
+    const { goalsOwn } = await this.getGoalsTeam(idTeam);
+    const goalsBalance = goalsFavor - goalsOwn;
+
+    return goalsBalance;
+  }
+
+  public async efficiencyTeam(idTeam: number): Promise<string> {
+    const score = await this.getScoreTeam(idTeam);
+    const matches = await this.getAllMatchesOfTeam(idTeam);
+    const efficiency = (score / (matches * 3)) * 100;
+
+    return efficiency.toFixed(2);
+  }
+
+  static sortReport(array: Array<IReport>) {
+    return array.sort((a, b) => {
+      if (a.totalPoints !== b.totalPoints) {
+        return b.totalPoints - a.totalPoints;
+      }
+      if (a.goalsBalance !== b.goalsBalance) {
+        return b.goalsBalance - a.goalsBalance;
+      }
+      return b.goalsFavor - a.goalsFavor;
+    });
+  }
+
   public async report(): Promise<IReport[]> {
     const allTeams = await this.getAllTeam();
 
@@ -112,8 +140,11 @@ export default class LeaderBoardService implements ILeaderBoardService {
       totalLosses: await this.getLossesTeam(team.id),
       goalsFavor: (await this.getGoalsTeam(team.id)).goalsFavor,
       goalsOwn: (await this.getGoalsTeam(team.id)).goalsOwn,
+      goalsBalance: await this.goalsBalance(team.id),
+      efficiency: await this.efficiencyTeam(team.id),
     })));
 
-    return report;
+    const reportSorted = LeaderBoardService.sortReport(report);
+    return reportSorted;
   }
 }
