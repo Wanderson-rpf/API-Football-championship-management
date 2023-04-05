@@ -9,12 +9,15 @@ const leaderBoardController = new LeaderBoardController(leaderBoardService);
 
 router.get(
   '/home',
-  leaderBoardController.report.bind(leaderBoardController),
-).get(
-  '/away',
-  leaderBoardController.report.bind(leaderBoardController),
+  leaderBoardController.reportHome.bind(leaderBoardController),
 );
-// .get(
+
+router.get(
+  '/away',
+  leaderBoardController.reportAway.bind(leaderBoardController),
+);
+
+// router.get(
 //   '/',
 //   leaderBoardController.generalReport.bind(leaderBoardController),
 // );
