@@ -12,8 +12,11 @@ export default class LeaderBoardController implements ILeaderBoardController {
   public async report(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { path } = req;
-      const report = await this._leaderBoardService
-        .report(path === '/home' ? 'homeTeamId' : 'awayTeamId');
+      // console.log('ROTA: Report:', path);
+
+      const report = await this._leaderBoardService.report(
+        path === '/home' ? 'homeTeamId' : 'awayTeamId',
+      );
 
       return res.status(200).json(report);
     } catch (error) {
@@ -27,6 +30,9 @@ export default class LeaderBoardController implements ILeaderBoardController {
     next: NextFunction,
   ): Promise<Response | void> {
     try {
+      // const { path } = req;
+      // console.log('ROTA: General report:', path);
+
       const report = await this._leaderBoardService.generalReport();
 
       return res.status(200).json(report);
