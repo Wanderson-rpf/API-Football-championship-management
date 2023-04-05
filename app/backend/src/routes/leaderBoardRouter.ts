@@ -10,16 +10,13 @@ const leaderBoardController = new LeaderBoardController(leaderBoardService);
 router.get(
   '/home',
   leaderBoardController.report.bind(leaderBoardController),
-);
-
-router.get(
+).get(
   '/away',
   leaderBoardController.report.bind(leaderBoardController),
 );
-
-router.get(
-  '/',
-  leaderBoardController.generalReport.bind(leaderBoardController),
-);
+// .get(
+//   '/',
+//   leaderBoardController.generalReport.bind(leaderBoardController),
+// );
 
 export default router;
