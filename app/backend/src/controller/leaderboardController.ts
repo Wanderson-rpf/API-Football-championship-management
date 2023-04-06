@@ -5,7 +5,9 @@ import ILeaderBoardController from './interface/ILeaderboardController';
 export default class LeaderBoardController implements ILeaderBoardController {
   private _leaderBoardService: ILeaderBoardService;
 
-  constructor(leaderBoardService: ILeaderBoardService) {
+  constructor(
+    leaderBoardService: ILeaderBoardService,
+  ) {
     this._leaderBoardService = leaderBoardService;
   }
 
@@ -15,9 +17,6 @@ export default class LeaderBoardController implements ILeaderBoardController {
     next: NextFunction,
   ): Promise<Response | void> {
     try {
-      const { path } = req;
-      console.log('ROTA:', path);
-
       const report = await this._leaderBoardService.report('homeTeamId');
 
       return res.status(200).json(report);
@@ -32,9 +31,6 @@ export default class LeaderBoardController implements ILeaderBoardController {
     next: NextFunction,
   ): Promise<Response | void> {
     try {
-      const { path } = req;
-      console.log('ROTA:', path);
-
       const report = await this._leaderBoardService.report('awayTeamId');
 
       return res.status(200).json(report);
@@ -49,9 +45,6 @@ export default class LeaderBoardController implements ILeaderBoardController {
     next: NextFunction,
   ): Promise<Response | void> {
     try {
-      const { path } = req;
-      console.log('ROTA:', path);
-
       const report = await this._leaderBoardService.generalReport();
 
       return res.status(200).json(report);

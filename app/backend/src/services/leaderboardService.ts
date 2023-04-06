@@ -1,12 +1,7 @@
-import { Op, ModelStatic } from 'sequelize';
-import sequelize = require('sequelize');
+import { ModelStatic } from 'sequelize';
 import Matches from '../database/models/Matches';
 import Teams from '../database/models/Teams';
-import ILeaderBoardService, {
-  IAllGoals,
-  IReport,
-  IStatistic,
-} from './interface/ILeaderboardService';
+import ILeaderBoardService, { IReport, IStatistic } from './interface/ILeaderboardService';
 
 export default class LeaderBoardService implements ILeaderBoardService {
   private _teamsModel: ModelStatic<Teams> = Teams;
@@ -17,109 +12,144 @@ export default class LeaderBoardService implements ILeaderBoardService {
     return teams;
   }
 
-  public async getAllMatchesOfTeam(
+  public async getAllMatches(): Promise<Matches[]> {
+    const matches = await this._matchesModel.findAll({
+      where: { inProgress: false },
+    });
+    return matches;
+  }
+
+  static getMatchesTeam(
     idTeam: number,
     team: 'homeTeamId' | 'awayTeamId',
-  ): Promise<number> {
-    const allMatchesOfTeam = await this._matchesModel.count({
-      where: {
-        inProgress: 0,
-        [team]: idTeam,
-      },
-    });
+    matches: Matches[],
+  ) {
+    if (team === 'homeTeamId') {
+      const countMatches = matches.map((match) => match.homeTeamId === idTeam)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
 
-    return allMatchesOfTeam;
+      return countMatches;
+    }
+    if (team === 'awayTeamId') {
+      const countMatches = matches.map((match) => match.awayTeamId === idTeam)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
+
+      return countMatches;
+    }
   }
 
-  public async getWinsTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
-    const baseGoals = team === 'homeTeamId' ? 'homeTeamGoals' : 'awayTeamGoals';
-    const compareGoals = team === 'homeTeamId' ? 'away_team_goals' : 'home_team_goals';
-    const wins = await this._matchesModel.count({
-      where: {
-        inProgress: 0,
-        [baseGoals]: { [Op.gt]: sequelize.col(compareGoals) },
-        [team]: idTeam,
-      },
-      distinct: true,
-      col: 'id',
-    });
+  static getWinsTeam(
+    idTeam: number,
+    team: 'homeTeamId' | 'awayTeamId',
+    matches: Matches[],
+  ) {
+    if (team === 'homeTeamId') {
+      const countWinsHome = matches.map((match) =>
+        match.homeTeamGoals > match.awayTeamGoals && match.homeTeamId === idTeam)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
 
-    return wins;
+      return countWinsHome;
+    }
+    if (team === 'awayTeamId') {
+      const countWinsAway = matches.map((match) =>
+        match.awayTeamGoals > match.homeTeamGoals && match.awayTeamId === idTeam)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
+
+      return countWinsAway;
+    }
   }
 
-  public async getDrawsTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
-    const baseGoals = team === 'homeTeamId' ? 'homeTeamGoals' : 'awayTeamGoals';
-    const compareGoals = team === 'homeTeamId' ? 'away_team_goals' : 'home_team_goals';
-    const draws = await this._matchesModel.count({
-      where: {
-        inProgress: 0,
-        [baseGoals]: { [Op.eq]: sequelize.col(compareGoals) },
-        [team]: idTeam,
-      },
-      distinct: true,
-      col: 'id',
-    });
+  static getDrawsTeam(
+    idTeam: number,
+    team: 'homeTeamId' | 'awayTeamId',
+    matches: Matches[],
+  ) {
+    if (team === 'homeTeamId') {
+      const countDrawHome = matches.map((match) =>
+        match.homeTeamGoals === match.awayTeamGoals && match.homeTeamId === idTeam)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
 
-    return draws;
+      return countDrawHome;
+    }
+    if (team === 'awayTeamId') {
+      const countDrawAway = matches.map((match) =>
+        match.awayTeamGoals === match.homeTeamGoals && match.awayTeamId === idTeam)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
+
+      return countDrawAway;
+    }
   }
 
-  public async getLossesTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
-    const baseGoals = team === 'homeTeamId' ? 'homeTeamGoals' : 'awayTeamGoals';
-    const compareGoals = team === 'homeTeamId' ? 'away_team_goals' : 'home_team_goals';
-    const draws = await this._matchesModel.count({
-      where: {
-        inProgress: 0,
-        [baseGoals]: { [Op.lt]: sequelize.col(compareGoals) },
-        [team]: idTeam,
-      },
-      distinct: true,
-      col: 'id',
-    });
+  static getLossesTeam(
+    idTeam: number,
+    team: 'homeTeamId' | 'awayTeamId',
+    matches: Matches[],
+  ) {
+    if (team === 'homeTeamId') {
+      const countLossHome = matches.map((match) =>
+        match.homeTeamGoals < match.awayTeamGoals && match.homeTeamId === idTeam)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
 
-    return draws;
+      return countLossHome;
+    }
+    if (team === 'awayTeamId') {
+      const countLossAway = matches.map((match) =>
+        match.awayTeamGoals < match.homeTeamGoals && match.awayTeamId === idTeam)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
+
+      return countLossAway;
+    }
   }
 
-  public async getGoalsTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<IAllGoals> {
-    const goalsF = team === 'homeTeamId' ? 'home_team_goals' : 'away_team_goals';
-    const goalsO = team === 'homeTeamId' ? 'away_team_goals' : 'home_team_goals';
-    const goalsFavor = await this._matchesModel.sum(goalsF, {
-      where: {
-        inProgress: 0,
-        [team]: idTeam,
-      },
-    });
-    const goalsOwn = await this._matchesModel.sum(goalsO, {
-      where: {
-        inProgress: 0,
-        [team]: idTeam,
-      },
-    });
-    const allGoals = { goalsFavor, goalsOwn };
+  static getGoalsTeam(
+    idTeam: number,
+    team: 'homeTeamId' | 'awayTeamId',
+    matches: Matches[],
+  ) {
+    if (team === 'homeTeamId') {
+      const goalsFavor = matches.map((match) => match.homeTeamId === idTeam && match.homeTeamGoals)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
 
-    return allGoals;
+      const goalsOwn = matches.map((match) => match.homeTeamId === idTeam && match.awayTeamGoals)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
+
+      return { goalsFavor, goalsOwn };
+    }
+    if (team === 'awayTeamId') {
+      const goalsFavor = matches.map((match) => match.awayTeamId === idTeam && match.awayTeamGoals)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
+
+      const goalsOwn = matches.map((match) => match.awayTeamId === idTeam && match.homeTeamGoals)
+        .reduce((acc, cur) => Number(acc) + Number(cur), 0);
+
+      return { goalsFavor, goalsOwn };
+    }
   }
 
-  public async getScoreTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
-    const matches = await this.getAllMatchesOfTeam(idTeam, team);
-    const wins = await this.getWinsTeam(idTeam, team);
-    const draw = await this.getDrawsTeam(idTeam, team);
-    const loss = await this.getLossesTeam(idTeam, team);
+  static getScoreTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId', allMatches: Matches[]) {
+    const matches = LeaderBoardService.getMatchesTeam(idTeam, team, allMatches) as number;
+    const wins = LeaderBoardService.getWinsTeam(idTeam, team, allMatches) as number;
+    const draw = LeaderBoardService.getDrawsTeam(idTeam, team, allMatches) as number;
+    const loss = LeaderBoardService.getLossesTeam(idTeam, team, allMatches) as number;
     const score = ((matches - draw - loss) * 3) + (matches - wins - loss);
 
     return score;
   }
 
-  public async goalsBalance(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<number> {
-    const { goalsFavor } = await this.getGoalsTeam(idTeam, team);
-    const { goalsOwn } = await this.getGoalsTeam(idTeam, team);
-    const goalsBalance = goalsFavor - goalsOwn;
+  static goalsBalance(idTeam: number, team: 'homeTeamId' | 'awayTeamId', allMatches: Matches[]) {
+    const goals = LeaderBoardService.getGoalsTeam(idTeam, team, allMatches);
+    const goalsBalance = Number(goals?.goalsFavor) - Number(goals?.goalsOwn);
 
     return goalsBalance;
   }
 
-  public async efficiencyTeam(idTeam: number, team: 'homeTeamId' | 'awayTeamId'): Promise<string> {
-    const score = await this.getScoreTeam(idTeam, team);
-    const matches = await this.getAllMatchesOfTeam(idTeam, team);
+  static efficiencyTeam(
+    idTeam: number,
+    team: 'homeTeamId' | 'awayTeamId',
+    allMatches: Matches[],
+  ) {
+    const score = LeaderBoardService.getScoreTeam(idTeam, team, allMatches);
+    const matches = LeaderBoardService.getMatchesTeam(idTeam, team, allMatches) as number;
     const efficiency = (score / (matches * 3)) * 100;
 
     return efficiency.toFixed(2);
@@ -139,18 +169,21 @@ export default class LeaderBoardService implements ILeaderBoardService {
 
   public async report(teamHomeOrAway: 'homeTeamId' | 'awayTeamId'): Promise<IReport[]> {
     const allTeams = await this.getAllTeam();
+    const allMatches = await this.getAllMatches();
 
     const report = await Promise.all(allTeams.map(async (team) => ({
       name: team.teamName,
-      totalPoints: await this.getScoreTeam(team.id, teamHomeOrAway),
-      totalGames: await this.getAllMatchesOfTeam(team.id, teamHomeOrAway),
-      totalVictories: await this.getWinsTeam(team.id, teamHomeOrAway),
-      totalDraws: await this.getDrawsTeam(team.id, teamHomeOrAway),
-      totalLosses: await this.getLossesTeam(team.id, teamHomeOrAway),
-      goalsFavor: (await this.getGoalsTeam(team.id, teamHomeOrAway)).goalsFavor,
-      goalsOwn: (await this.getGoalsTeam(team.id, teamHomeOrAway)).goalsOwn,
-      goalsBalance: await this.goalsBalance(team.id, teamHomeOrAway),
-      efficiency: await this.efficiencyTeam(team.id, teamHomeOrAway),
+      totalPoints: LeaderBoardService.getScoreTeam(team.id, teamHomeOrAway, allMatches),
+      totalGames: LeaderBoardService.getMatchesTeam(team.id, teamHomeOrAway, allMatches) as number,
+      totalVictories: LeaderBoardService.getWinsTeam(team.id, teamHomeOrAway, allMatches) as number,
+      totalDraws: LeaderBoardService.getDrawsTeam(team.id, teamHomeOrAway, allMatches) as number,
+      totalLosses: LeaderBoardService.getLossesTeam(team.id, teamHomeOrAway, allMatches) as number,
+      goalsFavor: LeaderBoardService.getGoalsTeam(team.id, teamHomeOrAway, allMatches)
+        ?.goalsFavor as number,
+      goalsOwn: LeaderBoardService.getGoalsTeam(team.id, teamHomeOrAway, allMatches)
+        ?.goalsOwn as number,
+      goalsBalance: LeaderBoardService.goalsBalance(team.id, teamHomeOrAway, allMatches),
+      efficiency: LeaderBoardService.efficiencyTeam(team.id, teamHomeOrAway, allMatches),
     })));
 
     const reportSorted = LeaderBoardService.sortReport(report);

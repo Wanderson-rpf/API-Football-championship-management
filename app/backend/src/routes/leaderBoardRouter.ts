@@ -17,9 +17,9 @@ router.get(
   leaderBoardController.reportAway.bind(leaderBoardController),
 );
 
-// router.get(
-//   '/',
-//   leaderBoardController.generalReport.bind(leaderBoardController),
-// );
+router.get(
+  '/',
+  leaderBoardController.generalReport.bind(leaderBoardController),
+);
 
 export default router;
