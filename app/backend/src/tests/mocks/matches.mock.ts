@@ -13,7 +13,42 @@ const match = [
       "teamName": "Grêmio"
     }
   }
-]
+];
+
+const newResultMatch = {
+  "homeTeamGoals": 3,
+  "awayTeamGoals": 1
+};
+
+const newMatchInvalidTeam = {
+  "homeTeamId": 51, 
+  "awayTeamId": 52, 
+  "homeTeamGoals": 2,
+  "awayTeamGoals": 2
+}
+
+const newMatchEqualsTeams = {
+  "homeTeamId": 1, 
+  "awayTeamId": 1, 
+  "homeTeamGoals": 2,
+  "awayTeamGoals": 2
+}
+
+const newMatchValid = {
+  "homeTeamId": 1, 
+  "awayTeamId": 2, 
+  "homeTeamGoals": 2,
+  "awayTeamGoals": 2
+}
+
+const addMatchSuccess = {
+	"id": 50,
+	"homeTeamId": 1,
+	"awayTeamId": 2,
+	"homeTeamGoals": 2,
+	"awayTeamGoals": 2,
+	"inProgress": true
+}
 
 const listAllMatches = [
   {
@@ -1398,6 +1433,11 @@ const matchesInProgressFalse = [
 
 export {
   match,
+  newResultMatch,
+  newMatchInvalidTeam,
+  newMatchEqualsTeams,
+  newMatchValid,
+  addMatchSuccess,
   listAllMatches,
   matchesInProgressTrue,
   matchesInProgressFalse,
