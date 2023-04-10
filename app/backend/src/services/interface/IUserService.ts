@@ -11,5 +11,5 @@ export interface IUserID extends IUser {
 
 export default interface IUserService {
   getUser(value: string, password: string): Promise<IUser>
-  verifyAuthentication(value: string, password: string): Promise<IUser>
+  verifyAuthentication(value: string): Promise<IUser>
 }

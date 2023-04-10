@@ -32,17 +32,10 @@ export default class LoginService implements IUserService {
     return user.dataValues;
   }
 
-  public async verifyAuthentication(email: string, password: string): Promise<IUserID> {
+  public async verifyAuthentication(email: string): Promise<IUserID> {
     const [user] = await this._userModel.findAll({
       where: { email },
     });
-
-    if (!user) {
-      throw new InvalidParamError(this._msgInvalidError);
-    }
-    if (password !== user.password) {
-      throw new InvalidParamError(this._msgInvalidError);
-    }
 
     return user.dataValues;
   }
