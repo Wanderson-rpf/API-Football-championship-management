@@ -14,7 +14,6 @@ export interface IMatch {
 
 export default interface IMatchesService {
   getAllMatches(): Promise<Matches[]>
-  getByIdMatches(id: number): Promise<Matches>
   getMatchesInProgress(statusProgress: string): Promise<Matches[]>
   updateStatusMatches(newStatus: string, id: number): Promise<void>
   updateScoreBoardMatches(newScore: IScore, id: number): Promise<void>
