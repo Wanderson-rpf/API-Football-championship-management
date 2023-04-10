@@ -11,12 +11,8 @@ export default class Token implements IToken {
   };
 
   public generate(payload: Omit<IUser, 'password'>): string {
-    try {
-      const token = jwt.sign(payload, this.secret, this.jwtConfig);
-      return token;
-    } catch (err) {
-      return (err as Error).message;
-    }
+    const token = jwt.sign(payload, this.secret, this.jwtConfig);
+    return token;
   }
 
   public verify(token: string): jwt.JwtPayload | string | void {
