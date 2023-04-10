@@ -1,5 +1,4 @@
 import { ModelStatic } from 'sequelize';
-import NotFoundError from '../errors/notFoundError';
 import Teams from '../database/models/Teams';
 import Matches from '../database/models/Matches';
 import IMatchesService, { IMatch, IScore } from './interface/IMatchesService';
@@ -29,13 +28,6 @@ export default class MatchesService implements IMatchesService {
       ],
     });
     return allMatches;
-  }
-
-  public async getByIdMatches(id: number): Promise<Matches> {
-    const match = await this._matchesModel.findByPk(id);
-
-    if (!match) throw new NotFoundError('Match not found');
-    return match.dataValues;
   }
 
   public async getMatchesInProgress(progress: string): Promise<Matches[]> {
