@@ -38,8 +38,10 @@ export default class MatchesService implements IMatchesService {
     return match.dataValues;
   }
 
-  public async getMatchesInProgress(statusProgress: string): Promise<Matches[]> {
-    const inProgress = statusProgress === 'true' ? 1 : 0;
+  public async getMatchesInProgress(progress: string): Promise<Matches[]> {
+    if (progress !== 'true' && progress !== 'false') throw new Error('Invalid parameter');
+
+    const inProgress = progress === 'true' ? 1 : 0;
 
     const matchesInProgress = await this._matchesModel.findAll({
       where: { inProgress },
