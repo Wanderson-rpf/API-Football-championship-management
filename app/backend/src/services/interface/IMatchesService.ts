@@ -13,6 +13,7 @@ export interface IMatch {
 }
 
 export default interface IMatchesService {
+  getByIdMatches(id: number): Promise<Matches>
   getAllMatches(): Promise<Matches[]>
   getMatchesInProgress(statusProgress: string): Promise<Matches[]>
   updateStatusMatches(newStatus: string, id: number): Promise<void>

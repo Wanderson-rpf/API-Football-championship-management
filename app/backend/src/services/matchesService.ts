@@ -3,6 +3,7 @@ import Teams from '../database/models/Teams';
 import Matches from '../database/models/Matches';
 import IMatchesService, { IMatch, IScore } from './interface/IMatchesService';
 import ITeamValidations from '../validations/team/interface/ITeamValidations';
+import NotFoundError from '../errors/notFoundError';
 
 export default class MatchesService implements IMatchesService {
   private _matchesModel: ModelStatic<Matches> = Matches;
@@ -10,6 +11,13 @@ export default class MatchesService implements IMatchesService {
 
   constructor(teamValidations: ITeamValidations) {
     this._teamValidations = teamValidations;
+  }
+
+  public async getByIdMatches(id: number): Promise<Matches> {
+    const match = await this._matchesModel.findByPk(id);
+
+    if (!match) throw new NotFoundError('Match not found');
+    return match.dataValues;
   }
 
   public async getAllMatches(): Promise<Matches[]> {
@@ -54,10 +62,12 @@ export default class MatchesService implements IMatchesService {
   }
 
   public async updateStatusMatches(newStatus: string, id: number): Promise<void> {
+    await this.getByIdMatches(id);
     await this._matchesModel.update({ inProgress: newStatus }, { where: { id } });
   }
 
   public async updateScoreBoardMatches(newScore: IScore, id: number): Promise<void> {
+    await this.getByIdMatches(id);
     await this._matchesModel.update({
       homeTeamGoals: newScore.homeTeamGoals,
       awayTeamGoals: newScore.awayTeamGoals,
