@@ -1,7 +1,7 @@
 # :soccer: API Football championship management :goal_net:
 
-API foi desenvolvida no curso de desenvolvimento web da Trybe.
-O projeto consiste em em desenvolver uma API para ser consumida pelo front-end, onde é informado 
+API desenvolvida no curso de desenvolvimento web da Trybe.
+O projeto consiste em desenvolver uma API para ser consumida pelo front-end, onde é informado 
 os dados sobre partidas e classificações de futebol. Para este foi provido regras de negocio especificas,
 como por exemplo, para adicionar novas partidas é necessário estar logado e ter o token validado.
 
